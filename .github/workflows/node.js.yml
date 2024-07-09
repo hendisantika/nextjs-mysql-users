@@ -157,13 +157,6 @@ jobs:
         with:
           registry-type: private
 
-      #      - name: connect and pull
-      #        env:
-      #          ECR_REGISTRY: ${{ steps.login-pf-aws-ecr.outputs.registry }}
-      #          ECR_REPOSITORY: ${{secrets.AWS_ECR_REPO}}
-      #          IMAGE_TAG: ${{ github.run_number }}
-      #        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.HOST }} "cd /var/www/DALIM && export ECR_PW=`aws ecr get-login-password --region ap-southeast1 --output text | docker login --username AWS --password-stdin` && docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest && docker compose pull && docker compose up -d && exit"
-
       - name: Create SSH key
         run: |
           mkdir -p ~/.ssh/

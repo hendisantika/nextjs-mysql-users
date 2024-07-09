@@ -6,7 +6,7 @@
 # https://s.id/hendisantika
 # -------------------------------------------------------------------
 ssh -p "${SERVER_PORT}" "${SERVER_USERNAME}"@"${SERVER_HOST}" -i key.txt -t -t -o StrictHostKeyChecking=no << 'ENDSSH'
-cd ~/user-manangement
+cd ~/user-management
 cat .env
 set +a
 source .env
