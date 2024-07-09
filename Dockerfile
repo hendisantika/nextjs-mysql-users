@@ -1,27 +1,23 @@
-# Use an official Node.js, and it should be version 16 and above
-FROM node:20-alpine
+FROM node:20-slim
 LABEL authors="hendisantika"
-ENV NUXT_HOST=0.0.0.0
-ENV NUXT_PORT=3000
-# Set the working directory in the container
+
 WORKDIR /app
-RUN apk --no-cache add openssh g++ make python3 git
-# Copy package.json and pnpm-lock.yaml
-COPY package.json /app
-COPY pnpm-lock.yaml /app
-# Install app dependencies using PNPM
-RUN npm install -g pnpm
-# Install dependencies
-RUN pnpm i
-# Copy the application code
-COPY ./ /app
-# Build the TypeScript code
-RUN pnpm run build
-# Expose the app
-ENV PORT=3000
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+COPY --chown=nextjs:nodejs .next/standalone ./
+COPY --chown=nextjs:nodejs .next/static ./.next/static
+COPY --chown=nextjs:nodejs ./public ./public
+
+USER nextjs
+
 EXPOSE 3000
-# Start the application
-#CMD ["pnpm", "start"]
-#CMD ["node", "/app/.output/server/index.mjs"]
-# run the build project with node
-ENTRYPOINT ["node", ".output/server/index.mjs"]
+
+ENV PORT 3000
+
+CMD HOSTNAME="0.0.0.0" node server.js
