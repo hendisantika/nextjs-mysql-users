@@ -52,7 +52,7 @@ function App({Component, pageProps}) {
   return (
       <>
         <Head>
-          <title>Next.js 13 - User Registration and Login Example</title>
+          <title>Next.js 14 - User Registration and Login Example</title>
         </Head>
 
         <div className={`app-container ${user ? 'bg-light' : ''}`}>
