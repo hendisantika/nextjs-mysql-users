@@ -1,23 +1,40 @@
-FROM node:20-slim
+# Use an official Node.js, and it should be version 16 and above
+FROM node:20-alpine  AS base
 LABEL authors="hendisantika"
+# Gunakan image dasar yang sesuai
 
+# Tentukan direktori kerja di dalam container
 WORKDIR /app
-ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Salin file pnpm-lock.yaml dan package.json untuk menginstal dependensi terlebih dahulu
+COPY package.json pnpm-lock.yaml ./
 
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+# Install pnpm
+RUN npm install -g pnpm
 
-COPY --chown=nextjs:nodejs .next/standalone ./
-COPY --chown=nextjs:nodejs .next/static ./.next/static
-COPY --chown=nextjs:nodejs ./public ./public
+# Install semua dependensi proyek
+RUN pnpm install
 
-USER nextjs
+# Salin seluruh kode proyek ke dalam container
+COPY . .
 
+# Build proyek Next.js
+RUN pnpm run build
+
+# Gunakan image dasar yang lebih ringan untuk produksi
+FROM node:20-alpine AS production
+
+# Tentukan direktori kerja di dalam container
+WORKDIR /app
+
+# Salin node_modules dan build output dari tahap sebelumnya
+COPY --from=base /app/node_modules ./node_modules
+COPY --from=base /app/.next ./.next
+COPY --from=base /app/public ./public
+COPY --from=base /app/package.json ./package.json
+
+# Ekspos port yang akan digunakan oleh aplikasi
 EXPOSE 3000
 
-ENV PORT 3000
-
-CMD HOSTNAME="0.0.0.0" node server.js
+# Jalankan perintah untuk memulai aplikasi
+CMD ["pnpm", "start"]
