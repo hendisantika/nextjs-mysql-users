@@ -37,4 +37,5 @@ COPY --from=base /app/package.json ./package.json
 EXPOSE 3000
 
 # Jalankan perintah untuk memulai aplikasi
-CMD ["pnpm", "start"]
+#CMD ["pnpm", "start"]
+ENTRYPOINT ["node", ".next/standalone/server.js"]
