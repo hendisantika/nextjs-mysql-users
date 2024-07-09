@@ -101,7 +101,7 @@ jobs:
             GIT_VERSION_HASH=${{ github.sha }}
 
   deploy:
-    needs: push-to-ecr
+    needs: docker-build
     name: deploy image
     runs-on: ubuntu-latest
 
