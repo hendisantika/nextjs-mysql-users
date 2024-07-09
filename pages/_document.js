@@ -16,10 +16,10 @@ function Document() {
 
             {/* credits */}
             <div className="text-center mt-4">
-                <p>
-                    <a href="https://jasonwatmore.com/next-js-13-mysql-user-registration-and-login-tutorial-with-example-app"
-                       target="_blank">Next.js 14 + MySQL - User Registration and Login Tutorial with Example App</a>
-                </p>
+                {/*<p>*/}
+                {/*    <a href="https://jasonwatmore.com/next-js-13-mysql-user-registration-and-login-tutorial-with-example-app"*/}
+                {/*       target="_blank">Next.js 14 + MySQL - User Registration and Login Tutorial with Example App</a>*/}
+                {/*</p>*/}
                 <p>
                     <a href="https://s.id/hendisantika" target="_blank">Hendi Santika</a>
                 </p>
