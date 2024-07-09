@@ -141,11 +141,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-southeast-1
 
-      - name: install ssh keys
+      #      - name: install ssh keys
+      #        run: |
+      #          install -m 600 -D /dev/null ~/.ssh/id_rsa
+      #          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+      #          ssh-keyscan -H ${{ secrets.HOST }} > ~/.ssh/known_hosts
+      - name: Add Server key
         run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOST }} > ~/.ssh/known_hosts
+          touch key.txt && echo "${{ secrets.SSH_KEY }}" > key.txt
+          chmod 600 key.txt
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -158,6 +163,66 @@ jobs:
       #          ECR_REPOSITORY: ${{secrets.AWS_ECR_REPO}}
       #          IMAGE_TAG: ${{ github.run_number }}
       #        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.HOST }} "cd /var/www/DALIM && export ECR_PW=`aws ecr get-login-password --region ap-southeast1 --output text | docker login --username AWS --password-stdin` && docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest && docker compose pull && docker compose up -d && exit"
+
+      - name: Create SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/private.key
+          sudo chmod 600 ~/.ssh/private.key
+          echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          sudo chmod 600 ~/.ssh/known_hosts
+        shell: bash
+        env:
+          SERVER_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SERVER_PORT: ${{ secrets.SSH_PORT }}
+          SERVER_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PRIVATE_KEY: ${{secrets.SSH_KEY}}
+          SSH_KNOWN_HOSTS: ${{secrets.SSH_HOST}}
+
+      - name: Set all environment variables
+        env:
+          SERVER_HOST: ${{ secrets.SSH_HOST }}
+          SERVER_PORT: ${{ secrets.SSH_PORT }}
+          SERVER_USERNAME: ${{ secrets.SSH_USERNAME }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: user-management
+          IMAGE_TAG: ${{ github.run_number }}
+          CONTAINER_NAME: user-management
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
+
+        run: |
+          echo AWS_REGION=$AWS_REGION >> .env
+          echo AWS_ECR_REGISTRY=$AWS_ECR_REGISTRY >> .env
+          echo CONTAINER_NAME=$CONTAINER_NAME >> .env
+          echo ECR_REPOSITORY=$ECR_REPOSITORY >> .env
+          echo IMAGE_TAG=$IMAGE_TAG >> .env
+
+      - name: Copy all environment variables
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "./.env"  # Path to the file on your runner
+          target: "~/user-management"  # Target directory on the server
+
+      - name: Run the application
+        env:
+          SERVER_HOST: ${{ secrets.SSH_HOST }}
+          SERVER_PORT: ${{ secrets.SSH_PORT }}
+          SERVER_USERNAME: ${{ secrets.SSH_USERNAME }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: mhdc-main
+          IMAGE_TAG: ${{ github.run_number }}
+          CONTAINER_NAME: mhdc-main
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
+
+        run: |
+          set -e
+          ./deploy.sh
 
       - name: Docker pull & run from github
         uses: appleboy/ssh-action@master
