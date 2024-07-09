@@ -2,7 +2,8 @@ import Head from 'next/head';
 import {useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 
-import '@/styles/globals.css'
+// import '@/styles/globals.css'
+import 'styles/globals.css';
 
 import {userService} from 'services';
 import {Alert, Nav} from 'components';

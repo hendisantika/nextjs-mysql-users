@@ -21,7 +21,7 @@ function Document() {
                        target="_blank">Next.js 13 + MySQL - User Registration and Login Tutorial with Example App</a>
                 </p>
                 <p>
-                    <a href="https://jasonwatmore.com" target="_blank">JasonWatmore.com</a>
+                    <a href="https://s.id/hendisantika" target="_blank">Hendi Santika</a>
                 </p>
             </div>
             </body>
